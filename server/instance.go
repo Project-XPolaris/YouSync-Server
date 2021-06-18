@@ -29,6 +29,10 @@ func (s Server) CheckChunk(ctx context.Context, in *pb.ChunkInfo) (*pb.CheckResu
 		return nil, err
 	}
 	filePath := filepath.Join(folder.Path, in.Path)
+	err = os.MkdirAll(filepath.Dir(filePath), os.ModePerm)
+	if err != nil {
+		return nil, err
+	}
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		return &pb.CheckResult{Success: false}, nil
 	}
@@ -36,6 +40,7 @@ func (s Server) CheckChunk(ctx context.Context, in *pb.ChunkInfo) (*pb.CheckResu
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 	stat, err := file.Stat()
 	if err != nil {
 		return nil, err
@@ -68,6 +73,12 @@ func (s Server) SyncFileChunk(ctx context.Context, in *pb.Chunk) (*pb.SyncChunkR
 	_, err = file.WriteAt(in.Data, int64(in.Offset))
 	if err != nil {
 		return nil, err
+	}
+	if in.LastChunk {
+		err = file.Truncate(int64(in.Offset + in.Size))
+		if err != nil {
+			return nil, err
+		}
 	}
 	file.Close()
 	return &pb.SyncChunkResult{Success: true}, nil
