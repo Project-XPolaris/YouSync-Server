@@ -8,6 +8,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.7 // indirect
 	github.com/rs/cors v1.7.0
 	github.com/sirupsen/logrus v1.8.1
+	github.com/spf13/afero v1.1.2 // indirect
 	github.com/spf13/viper v1.7.0
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/sys v0.0.0-20210608053332-aa57babbf139 // indirect

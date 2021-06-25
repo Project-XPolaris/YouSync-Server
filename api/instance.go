@@ -13,5 +13,7 @@ func RunAPIService() {
 	e.UseMiddleware(middleware.NewLoggerMiddleware())
 	e.UseMiddleware(middleware.NewPaginationMiddleware("page", "pageSize", 1, 20))
 	e.Router.POST("/sync/folder", newSyncFolderHandler)
+	e.Router.GET("/explore/readdir", readDirectoryHandler)
+	e.Router.GET("/info", serviceInfoHandler)
 	e.RunAndListen(config.Instance.Addr)
 }

@@ -6,7 +6,6 @@ import (
 )
 
 func SHA256Checksum(data []byte) string {
-	hash := sha256.New()
-	sum := hash.Sum(data)
-	return fmt.Sprintf("%x", sum)
+	hash := sha256.Sum256(data)
+	return fmt.Sprintf("%x", hash)
 }
