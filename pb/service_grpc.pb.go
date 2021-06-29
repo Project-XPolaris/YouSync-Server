@@ -20,6 +20,9 @@ const _ = grpc.SupportPackageIsVersion7
 type FileSyncClient interface {
 	CheckChunk(ctx context.Context, in *ChunkInfo, opts ...grpc.CallOption) (*CheckResult, error)
 	SyncFileChunk(ctx context.Context, in *Chunk, opts ...grpc.CallOption) (*SyncChunkResult, error)
+	ReadFolderFiles(ctx context.Context, in *RemoteFilesMessage, opts ...grpc.CallOption) (*RemoteFilesResult, error)
+	GetRemoteFileChunkInfo(ctx context.Context, in *GetRemoteChunkInfoMessage, opts ...grpc.CallOption) (*RemoteChunkInfo, error)
+	GetRemoteFileChunk(ctx context.Context, in *GetRemoteChunkMessage, opts ...grpc.CallOption) (*RemoteChunk, error)
 }
 
 type fileSyncClient struct {
@@ -48,12 +51,42 @@ func (c *fileSyncClient) SyncFileChunk(ctx context.Context, in *Chunk, opts ...g
 	return out, nil
 }
 
+func (c *fileSyncClient) ReadFolderFiles(ctx context.Context, in *RemoteFilesMessage, opts ...grpc.CallOption) (*RemoteFilesResult, error) {
+	out := new(RemoteFilesResult)
+	err := c.cc.Invoke(ctx, "/FileSync/ReadFolderFiles", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileSyncClient) GetRemoteFileChunkInfo(ctx context.Context, in *GetRemoteChunkInfoMessage, opts ...grpc.CallOption) (*RemoteChunkInfo, error) {
+	out := new(RemoteChunkInfo)
+	err := c.cc.Invoke(ctx, "/FileSync/GetRemoteFileChunkInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileSyncClient) GetRemoteFileChunk(ctx context.Context, in *GetRemoteChunkMessage, opts ...grpc.CallOption) (*RemoteChunk, error) {
+	out := new(RemoteChunk)
+	err := c.cc.Invoke(ctx, "/FileSync/GetRemoteFileChunk", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FileSyncServer is the server API for FileSync service.
 // All implementations must embed UnimplementedFileSyncServer
 // for forward compatibility
 type FileSyncServer interface {
 	CheckChunk(context.Context, *ChunkInfo) (*CheckResult, error)
 	SyncFileChunk(context.Context, *Chunk) (*SyncChunkResult, error)
+	ReadFolderFiles(context.Context, *RemoteFilesMessage) (*RemoteFilesResult, error)
+	GetRemoteFileChunkInfo(context.Context, *GetRemoteChunkInfoMessage) (*RemoteChunkInfo, error)
+	GetRemoteFileChunk(context.Context, *GetRemoteChunkMessage) (*RemoteChunk, error)
 	mustEmbedUnimplementedFileSyncServer()
 }
 
@@ -66,6 +99,15 @@ func (UnimplementedFileSyncServer) CheckChunk(context.Context, *ChunkInfo) (*Che
 }
 func (UnimplementedFileSyncServer) SyncFileChunk(context.Context, *Chunk) (*SyncChunkResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SyncFileChunk not implemented")
+}
+func (UnimplementedFileSyncServer) ReadFolderFiles(context.Context, *RemoteFilesMessage) (*RemoteFilesResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReadFolderFiles not implemented")
+}
+func (UnimplementedFileSyncServer) GetRemoteFileChunkInfo(context.Context, *GetRemoteChunkInfoMessage) (*RemoteChunkInfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRemoteFileChunkInfo not implemented")
+}
+func (UnimplementedFileSyncServer) GetRemoteFileChunk(context.Context, *GetRemoteChunkMessage) (*RemoteChunk, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRemoteFileChunk not implemented")
 }
 func (UnimplementedFileSyncServer) mustEmbedUnimplementedFileSyncServer() {}
 
@@ -116,6 +158,60 @@ func _FileSync_SyncFileChunk_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FileSync_ReadFolderFiles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoteFilesMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileSyncServer).ReadFolderFiles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/FileSync/ReadFolderFiles",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileSyncServer).ReadFolderFiles(ctx, req.(*RemoteFilesMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileSync_GetRemoteFileChunkInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRemoteChunkInfoMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileSyncServer).GetRemoteFileChunkInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/FileSync/GetRemoteFileChunkInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileSyncServer).GetRemoteFileChunkInfo(ctx, req.(*GetRemoteChunkInfoMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileSync_GetRemoteFileChunk_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRemoteChunkMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileSyncServer).GetRemoteFileChunk(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/FileSync/GetRemoteFileChunk",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileSyncServer).GetRemoteFileChunk(ctx, req.(*GetRemoteChunkMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FileSync_ServiceDesc is the grpc.ServiceDesc for FileSync service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -130,6 +226,18 @@ var FileSync_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SyncFileChunk",
 			Handler:    _FileSync_SyncFileChunk_Handler,
+		},
+		{
+			MethodName: "ReadFolderFiles",
+			Handler:    _FileSync_ReadFolderFiles_Handler,
+		},
+		{
+			MethodName: "GetRemoteFileChunkInfo",
+			Handler:    _FileSync_GetRemoteFileChunkInfo_Handler,
+		},
+		{
+			MethodName: "GetRemoteFileChunk",
+			Handler:    _FileSync_GetRemoteFileChunk_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
