@@ -5,7 +5,10 @@ import "github.com/spf13/viper"
 var Instance Config
 
 type Config struct {
-	Addr string
+	Addr        string
+	YouPlusPath bool
+	YouPlusAuth bool
+	YouPlusUrl  string
 }
 
 func ReadConfig() error {
@@ -19,9 +22,15 @@ func ReadConfig() error {
 		return err
 	}
 	configer.SetDefault("addr", ":4300")
+	configer.SetDefault("youplus.enablepath", false)
+	configer.SetDefault("youplus.url", "http://localhost:8999")
+	configer.SetDefault("youplus.auth", false)
 
 	Instance = Config{
-		Addr: configer.GetString("addr"),
+		Addr:        configer.GetString("addr"),
+		YouPlusPath: configer.GetBool("youplus.enablepath"),
+		YouPlusUrl:  configer.GetString("youplus.url"),
+		YouPlusAuth: configer.GetBool("youplus.auth"),
 	}
 	return nil
 }

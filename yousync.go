@@ -11,6 +11,7 @@ import (
 	"yousync/config"
 	"yousync/database"
 	"yousync/server"
+	"yousync/youplus"
 )
 
 var svcConfig *srv.Config
@@ -37,6 +38,19 @@ func Program() {
 	err = database.InitDatabase()
 	if err != nil {
 		logrus.Fatal(err)
+	}
+	// youplus enable
+	if config.Instance.YouPlusPath {
+		youplusLog := Logger.WithFields(logrus.Fields{
+			"scope": "YouPlus",
+			"url":   config.Instance.YouPlusUrl,
+		})
+		youplusLog.Info("check youplus service [checking]")
+		err = youplus.InitClient()
+		if err != nil {
+			youplusLog.Fatal(err)
+		}
+		youplusLog.Info("check youplus service [pass]")
 	}
 	go func() {
 		server.Default.Run()
