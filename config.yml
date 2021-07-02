@@ -1,4 +1,5 @@
 addr: ":4300"
 youplus:
-  enablePath: true
+  enablePath: false
+  auth: false
   url: "http://localhost:8999"

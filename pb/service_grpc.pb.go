@@ -23,6 +23,7 @@ type FileSyncClient interface {
 	ReadFolderFiles(ctx context.Context, in *RemoteFilesMessage, opts ...grpc.CallOption) (*RemoteFilesResult, error)
 	GetRemoteFileChunkInfo(ctx context.Context, in *GetRemoteChunkInfoMessage, opts ...grpc.CallOption) (*RemoteChunkInfo, error)
 	GetRemoteFileChunk(ctx context.Context, in *GetRemoteChunkMessage, opts ...grpc.CallOption) (*RemoteChunk, error)
+	SyncFileList(ctx context.Context, in *SyncFileListMessage, opts ...grpc.CallOption) (*BaseResponse, error)
 }
 
 type fileSyncClient struct {
@@ -78,6 +79,15 @@ func (c *fileSyncClient) GetRemoteFileChunk(ctx context.Context, in *GetRemoteCh
 	return out, nil
 }
 
+func (c *fileSyncClient) SyncFileList(ctx context.Context, in *SyncFileListMessage, opts ...grpc.CallOption) (*BaseResponse, error) {
+	out := new(BaseResponse)
+	err := c.cc.Invoke(ctx, "/FileSync/SyncFileList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FileSyncServer is the server API for FileSync service.
 // All implementations must embed UnimplementedFileSyncServer
 // for forward compatibility
@@ -87,6 +97,7 @@ type FileSyncServer interface {
 	ReadFolderFiles(context.Context, *RemoteFilesMessage) (*RemoteFilesResult, error)
 	GetRemoteFileChunkInfo(context.Context, *GetRemoteChunkInfoMessage) (*RemoteChunkInfo, error)
 	GetRemoteFileChunk(context.Context, *GetRemoteChunkMessage) (*RemoteChunk, error)
+	SyncFileList(context.Context, *SyncFileListMessage) (*BaseResponse, error)
 	mustEmbedUnimplementedFileSyncServer()
 }
 
@@ -108,6 +119,9 @@ func (UnimplementedFileSyncServer) GetRemoteFileChunkInfo(context.Context, *GetR
 }
 func (UnimplementedFileSyncServer) GetRemoteFileChunk(context.Context, *GetRemoteChunkMessage) (*RemoteChunk, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRemoteFileChunk not implemented")
+}
+func (UnimplementedFileSyncServer) SyncFileList(context.Context, *SyncFileListMessage) (*BaseResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SyncFileList not implemented")
 }
 func (UnimplementedFileSyncServer) mustEmbedUnimplementedFileSyncServer() {}
 
@@ -212,6 +226,24 @@ func _FileSync_GetRemoteFileChunk_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FileSync_SyncFileList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SyncFileListMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileSyncServer).SyncFileList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/FileSync/SyncFileList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileSyncServer).SyncFileList(ctx, req.(*SyncFileListMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FileSync_ServiceDesc is the grpc.ServiceDesc for FileSync service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -238,6 +270,10 @@ var FileSync_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetRemoteFileChunk",
 			Handler:    _FileSync_GetRemoteFileChunk_Handler,
+		},
+		{
+			MethodName: "SyncFileList",
+			Handler:    _FileSync_SyncFileList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

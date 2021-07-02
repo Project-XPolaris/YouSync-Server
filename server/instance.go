@@ -183,6 +183,68 @@ func (s Server) GetRemoteFileChunk(ctx context.Context, in *pb.GetRemoteChunkMes
 		Data: buf,
 	}, nil
 }
+func (s Server) SyncFileList(ctx context.Context, in *pb.SyncFileListMessage) (*pb.BaseResponse, error) {
+	var folder database.SyncFolder
+	err := database.Instance.First(&folder, in.FolderId).Error
+	if err != nil {
+		return nil, err
+	}
+
+	folderExistMap := map[string]bool{}
+	for _, fileItem := range in.Folder {
+		syncFilePath := filepath.Join(folder.Path, filepath.Clean(fileItem.Path))
+		folderExistMap[syncFilePath] = true
+	}
+	// clear up folder
+	err = afero.Walk(service.AppFs, folder.Path, func(path string, info fs.FileInfo, err error) error {
+		if !info.IsDir() || path == folder.Path {
+			return nil
+		}
+		exist, _ := folderExistMap[path]
+		if !exist {
+			stat, err := os.Stat(path)
+			if stat != nil {
+				err = os.RemoveAll(path)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// clean up file
+	pathExistMap := map[string]bool{}
+	for _, fileItem := range in.File {
+		syncFilePath := filepath.Join(folder.Path, filepath.Clean(fileItem.Path))
+		pathExistMap[syncFilePath] = true
+	}
+	err = afero.Walk(service.AppFs, folder.Path, func(path string, info fs.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+		exist, _ := pathExistMap[path]
+		if !exist {
+			stat, err := os.Stat(path)
+			if stat != nil {
+				err = os.RemoveAll(path)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &pb.BaseResponse{
+		Success: true,
+	}, nil
+}
 func (s *USyncService) Run() {
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {

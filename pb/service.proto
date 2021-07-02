@@ -6,6 +6,10 @@ service FileSync {
   rpc ReadFolderFiles(RemoteFilesMessage) returns (RemoteFilesResult){}
   rpc GetRemoteFileChunkInfo(GetRemoteChunkInfoMessage) returns (RemoteChunkInfo){}
   rpc GetRemoteFileChunk(GetRemoteChunkMessage) returns (RemoteChunk){}
+  rpc SyncFileList(SyncFileListMessage) returns (BaseResponse){}
+}
+message BaseResponse {
+  bool success = 1;
 }
 message ChunkInfo {
   uint64 index    = 1;
@@ -61,4 +65,12 @@ message GetRemoteChunkMessage {
 
 message RemoteChunk {
   bytes data = 1;
+}
+message SyncFileItem {
+  string path = 1;
+}
+message SyncFileListMessage {
+  repeated SyncFileItem folder   = 1;
+  repeated SyncFileItem file     = 2;
+  uint64                folderId = 3;
 }
