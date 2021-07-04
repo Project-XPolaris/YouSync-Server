@@ -10,11 +10,13 @@ import (
 type BaseSyncFolder struct {
 	Id   uint   `json:"id"`
 	Name string `json:"name"`
+	Path string `json:"path"`
 }
 
 func (f *BaseSyncFolder) Assign(folder *database.SyncFolder) {
 	f.Id = folder.ID
 	f.Name = filepath.Base(folder.Path)
+	f.Path = folder.DisplayPath
 }
 
 type BaseFileItemTemplate struct {

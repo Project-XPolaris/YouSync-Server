@@ -8,7 +8,9 @@ import (
 	"yousync/youplus"
 )
 
-var noAuthPath = []string{}
+var noAuthPath = []string{
+	"/user/auth",
+}
 
 type AuthMiddleware struct {
 }
@@ -44,4 +46,15 @@ func (a *AuthMiddleware) OnRequest(ctx *haruka.Context) {
 		ctx.Param["uid"] = service.PublicUid
 		ctx.Param["username"] = service.PublicUsername
 	}
+}
+
+type ReadUserMiddleware struct {
+}
+
+func (m *ReadUserMiddleware) OnRequest(ctx *haruka.Context) {
+	if ctx.Param["uid"] == nil {
+		return
+	}
+	user, _ := service.GetUserById(ctx.Param["uid"].(string))
+	ctx.Param["user"] = user
 }

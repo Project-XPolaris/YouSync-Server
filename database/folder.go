@@ -4,5 +4,7 @@ import "gorm.io/gorm"
 
 type SyncFolder struct {
 	gorm.Model
-	Path string
+	Path        string
+	DisplayPath string
+	Uid         string
 }

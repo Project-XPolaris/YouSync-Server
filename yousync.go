@@ -40,7 +40,7 @@ func Program() {
 		logrus.Fatal(err)
 	}
 	// youplus enable
-	if config.Instance.YouPlusPath {
+	if config.Instance.YouPlusPath || config.Instance.YouPlusAuth {
 		youplusLog := Logger.WithFields(logrus.Fields{
 			"scope": "YouPlus",
 			"url":   config.Instance.YouPlusUrl,

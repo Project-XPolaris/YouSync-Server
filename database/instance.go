@@ -15,9 +15,13 @@ func InitDatabase() error {
 	}
 
 	// Migrate the schema
-	err = Instance.AutoMigrate(&SyncFolder{})
+	err = Instance.AutoMigrate(&SyncFolder{}, &User{})
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func InitDefaultUser() {
+
 }
